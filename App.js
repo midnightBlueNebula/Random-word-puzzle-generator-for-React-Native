@@ -113,7 +113,7 @@ function renderBoard(changeDirection, boxSelection, keySelection, reset=false){
 }
 
 
-function getWordDefinition(index = 0){ 
+function getWordDefinition(changeHintButtonVisibility, changeDefs, index = 0){ 
   if(index < words.length){
     fetch("https://api.dictionaryapi.dev/api/v2/entries/en/" + words[index].join("").toLowerCase()) 
         .then(response => response.json()) 
@@ -126,8 +126,12 @@ function getWordDefinition(index = 0){
             definitions.push(definition);
           }
       
-          getWordDefinition(++index)
+          getWordDefinition(changeHintButtonVisibility, changeDefs, ++index)
         });
+  } else {
+    changeHintButtonVisibility(true);
+    defsView = definitions.map(def => <li>{def}</li>)
+    changeDefs([...defsView])
   }
 } 
 
@@ -219,18 +223,11 @@ export default function App() {
   const [defs, changeDefs] = React.useState([]);
   const [direction, changeDirection] = React.useState(true); // true -> vertical, false -> horizontal.
   const [viewMode, changeViewMode] = React.useState(0);
-  const [showHintsButton, chnageHintButtonVisibility] = React.useState(false);
+  const [showHintsButton, changeHintButtonVisibility] = React.useState(false);
   
   React.useEffect(() => { 
-                          chnageHintButtonVisibility(false);
-                          getWordDefinition();
-                          console.log("definitions: ", definitions);
-                          setTimeout(function(){ 
-                            console.log("definitions: ", definitions); 
-                            defsView = definitions.map(def => <li>{def}</li>)
-                            changeDefs([...defsView])
-                            chnageHintButtonVisibility(true);
-                          }, 5000)
+                          changeHintButtonVisibility(false);
+                          getWordDefinition(changeHintButtonVisibility, changeDefs);
                         }, 
                         [board]);  
  
